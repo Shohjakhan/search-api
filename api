@@ -1,0 +1,42 @@
+from googleapiclient.discovery import build
+
+# Replace this with your actual API key
+API_KEY = 'AIzaSyBIGO4BYP9z4ntqfRgnMcfYh4gfuBOuKCM'
+youtube = build('youtube', 'v3', developerKey=API_KEY)
+
+def search_relevant_videos():
+    language = input("Enter language(uz, ru, en):")  # Specify language code here (e.g., 'en' for English)
+    query = input("Enter your search query: ")
+
+    # Make the API request
+    request = youtube.search().list(
+        q=query,
+        part="snippet",
+        type="video",
+        maxResults=1,  # Limit to 5 results; adjust if needed
+        order="relevance",  # Sort by relevance
+        relevanceLanguage=language
+    )
+    response = request.execute()
+
+    # Filter videos based on response items
+    videos = [
+        {
+            'title': item['snippet']['title'],
+            'videoId': item['id']['videoId'],
+            'description': item['snippet']['description'],
+            'thumbnail': item['snippet']['thumbnails']['high']['url'],
+        }
+        for item in response.get('items', [])
+        if item['snippet']['title'] and item['snippet']['description']
+    ]
+
+    # Display the videos or show "No relevant videos found"
+    if videos:
+        for video in videos:
+            print(f"link: https://www.youtube.com/watch?v={video['videoId']}")
+    else:
+        print("No relevant videos found.")
+
+# Run the function to search for videos
+search_relevant_videos()
